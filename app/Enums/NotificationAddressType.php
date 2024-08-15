@@ -5,6 +5,7 @@ namespace App\Enums;
 use App\Models\User;
 use App\Models\Respondent;
 
+// Tipo de destinatário
 enum NotificationAddressType: string
 {
     case EMAIL = 'email';
@@ -16,9 +17,9 @@ enum NotificationAddressType: string
         return array_map(fn($enum) => $enum->value, self::cases());
     }
 
+    // Validar diferentes tipos de valores | utilizada no Rule de validação do campo notifications_config
     public static function isValidValue($validationType, $value): bool
     {
-        // Validar diferentes tipos de valores
         switch (strtolower($validationType)) {
             case 'email':
                 return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;

@@ -20,6 +20,8 @@ class SendFormAnswers
         Respondent $respondent
     )
     {
+        $respondent->load(['form.user']);
+
         switch($notificationConfig->resource) {
             case NotificationResource::WEBHOOK:
                 $this->viaWebhook($respondent, $notificationConfig->addresses->values);

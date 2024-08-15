@@ -35,6 +35,9 @@ class AnswerController extends Controller
             'is_last' => 'sometimes|boolean',
             'respondent_email' => 'sometimes|email',
         ])->after(function ($validator) use ($request) {
+            /**
+             * realizando a validação do campo respondent_email somente se nas configurações do formulário existir um NotificationContentType::COPIA_RESPOSTAS_FORMULARIO)
+             */
             $form = Form::where('slug', $request->input('form_id'))->first();
 
             if ($form && !empty($form->notifications_config) && $form->containsContentType(NotificationContentType::COPIA_RESPOSTAS_FORMULARIO)) {

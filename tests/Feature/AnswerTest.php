@@ -189,7 +189,6 @@ class AnswerTest extends TestCase
 
     public function test_respondent_can_complete_a_session_with_zap_message_queued_job()
     {
-        // Falsifica o sistema de jobs e logs
         Bus::fake();
 
         Schema::table('users', function ($table) {
@@ -198,7 +197,6 @@ class AnswerTest extends TestCase
             }
         });
 
-        // Cria o usuário com o atributo phone
         $user = User::factory()->create(['phone' => '11987654321']);
 
         $form = Form::factory()->for($user)->state([
@@ -216,15 +214,12 @@ class AnswerTest extends TestCase
         $answer = Answer::factory()->for($form)->make(["respondent_id" => null]);
         $answer->is_last = true;
 
-        // Executa a rota que você deseja testar
         $post = $this->post('/api/answers', $answer->toArray());
 
-        // Verifica se o job SendZapMessage foi enfileirado
         Bus::assertDispatched(SendZapMessage::class, function ($job) use ($user) {
             return $job->number === $user->phone;
         });
 
-        // Verifica se o respondent foi salvo corretamente no banco de dados
         $this->assertDatabaseHas("respondents", [
             "public_id" => $post['data']['respondent'],
         ]);

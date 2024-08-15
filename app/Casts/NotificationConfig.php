@@ -15,12 +15,13 @@ class NotificationConfig implements CastsAttributes
 {
     public function get(Model $model, string $key, mixed $value, array $attributes): array
     {
-        $value = json_decode($value, true);
+        $value = json_decode($value, true); // o valor vem em stringfy do db
 
         if (empty($value)) {
             return [];
         }
 
+        // instanciando utilizando as classes que garantem a estruta do notifications_config
         return array_map(function ($item) {
             return new NotificationConfigValueObject(
                 NotificationResource::from($item['resource']),

@@ -23,3 +23,5 @@ Realizei alguns testes unitários para garantir que as funções estavam funcion
 - Alterações no .env ou .env.testing executar os comandos `php artisan config:clear && php artisan config:cache` (apanhei por falta disso)
 
 - Acredito que houveram muitos novos arquivos, porém, a maioria é "formalidade".
+
+- Sobre o chatgpt gosto de utilizar para me ajudar a escrever testes, pois, temos que mockar muitas informações. Utilizo para tirar dúvidas no geral. Costumo pedir exemplo e analisar para ter um direcionamento quando estou meio perdida. E por fim, utilizo qnd temrino de escrever um código e quero saber se posso refatorar para ficar mais simples (não faço isso toda vez por ou por não lembrar ou por estar satisfeita com o código que escrevi).

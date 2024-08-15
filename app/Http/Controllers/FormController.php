@@ -25,7 +25,7 @@ class FormController extends Controller
             'fields.*.label' => 'required|string',
             'fields.*.type' => 'required|string',
             'fields.*.required' => 'required|boolean',
-            'notifications_config' => ['sometimes' , 'array', new ValidNotificationConfig()],
+            'notifications_config' => ['sometimes', new ValidNotificationConfig()],
         ]);
 
         if(Gate::denies('forms:create')) {
@@ -67,7 +67,7 @@ class FormController extends Controller
             'fields.*.type' => 'required|string',
             'fields.*.required' => 'required|boolean',
             'fields.*.field_id' => 'sometimes|string',
-            'notifications_config' => ['sometimes' , 'array', new ValidNotificationConfig()],
+            'notifications_config' => ['sometimes', new ValidNotificationConfig()],
         ]);
 
         try {
