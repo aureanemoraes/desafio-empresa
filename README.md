@@ -25,3 +25,7 @@ Realizei alguns testes unitários para garantir que as funções estavam funcion
 - Acredito que houveram muitos novos arquivos, porém, a maioria é "formalidade".
 
 - Sobre o chatgpt gosto de utilizar para me ajudar a escrever testes, pois, temos que mockar muitas informações. Utilizo para tirar dúvidas no geral. Costumo pedir exemplo e analisar para ter um direcionamento quando estou meio perdida. E por fim, utilizo qnd temrino de escrever um código e quero saber se posso refatorar para ficar mais simples (não faço isso toda vez por ou por não lembrar ou por estar satisfeita com o código que escrevi).
+
+- Só quando finalizei o desafio assisti o vídeo que explicava como testar as rotas via http... E vi que era necessário chamar uma rota para notificação... Havia feito integrado com a lógica de ultima resposta... Quando escrevi o teste via HTTP percebi que não fazia tanto sentido a estrutura que eu havia criado e me toquei que realmente facilita mais a compreensão do que precisar ser desenvolvido ter essa visualização do body da request... Deixei o commit da estrutura antiga e da correção para a atual.
+
+- Obrigada!
