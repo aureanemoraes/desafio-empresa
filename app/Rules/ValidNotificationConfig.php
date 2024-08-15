@@ -3,11 +3,7 @@
 namespace App\Rules;
 
 use Closure;
-use Illuminate\Support\Arr;
-use App\Enums\NotificationResource;
-use App\Enums\NotificationAddressType;
-use App\Enums\NotificationContentType;
-use Illuminate\Validation\ValidationException;
+use App\Enums\NotificationResourceType;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 class ValidNotificationConfig implements ValidationRule
@@ -27,50 +23,42 @@ class ValidNotificationConfig implements ValidationRule
         }
 
         foreach ($configs as $config) {
-            foreach($config as $index => $value) {
-                // Validate 'resource'
-                if (!isset($config['resource']) || !in_array($config['resource'], NotificationResource::values(), true)) {
-                    $fail("The resource in :attribute at index {$index} is invalid.");
+            if (!isset($config['content_type'])) {
+                $fail("The resource in :attribute at index content_type is required.");
+                return;
+            }
+
+            if (!isset($config['resources'])) {
+                $fail("The resource in :attribute at index resources is required.");
+                return;
+            }
+
+            if (!is_array($config['resources'])) {
+                $fail("The resource in :attribute at index resources must be an array.");
+                return;
+            }
+
+            foreach ($config['resources'] as $resource) {
+                if (!in_array($resource['type'], NotificationResourceType::values())) {
+                    $fail("The :attribute at index resources.*.type contain an invalid input.");
                     return;
                 }
 
-                // Validate 'content_type'
-                if (!isset($config['content_type']) || !in_array($config['content_type'], NotificationContentType::values(), true)) {
-                    $fail("The content_type in :attribute at index {$index} is invalid.");
+                if (isset($resource['values']) && !is_array($resource['values'])) {
+                    $fail("The enable in :attribute at index resources.*.values must be an array.");
                     return;
                 }
 
-                // Validate 'addresses'
-                if (!isset($config['addresses']) || !is_array($config['addresses'])) {
-                    $fail("The addresses in :attribute at index {$index} must be an array.");
+
+                if (isset($resource['enable']) && !is_bool($resource['enable'])) {
+                    $fail("The enable in :attribute at index resources.*.enable must be true or false.");
                     return;
                 }
 
-                if (!isset($config['addresses']['type']) || !in_array($config['addresses']['type'], NotificationAddressType::values(), true)) {
-                    $fail("The address type in :attribute at index {$index} is invalid.");
+                if (isset($resource['aditional_config']) && !is_array($resource['aditional_config'])) {
+                    $fail("The enable in :attribute at index resources.*.aditional_config must be an array.");
                     return;
                 }
-
-                if (isset($config['addresses']['values']) && !is_array($config['addresses']['values'])) {
-                    $fail("The values in addresses in :attribute at index {$index} must be an array.");
-                    return;
-                }
-
-                if (isset($config['addresses']['values'])) {
-                    foreach ($config['addresses']['values'] as $value) {
-                        if(!NotificationAddressType::isValidValue($config['addresses']['type'], $value)) {
-                            $fail("The values in addresses in :attribute at index {$index} contain an invalid input.");
-                            return;
-                        }
-
-                    }
-                }
-
-                if (!isset($config['enable']) || !is_bool($config['enable'])) {
-                    $fail("The enable in :attribute at index {$index} must be true or false.");
-                    return;
-                }
-
             }
         }
     }

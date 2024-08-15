@@ -10,9 +10,10 @@
 # também deve configurar o @host de acordo com o endereço do seu
 # ambiente atual.
 
-@host = http://localhost:8000
+@host = http://respondiapp:8080
 @token = {{userCreate.response.body.access_token}}
 @slug = {{formCreate.response.body.data.slug}}
+@publicId = {{lastAnswer.response.body.data.public_id}}
 
 ### Criar um usuário
 # Você precisa ter um usuário autenticado para criar seu primeiro
@@ -42,21 +43,61 @@ Authorization: Bearer {{token}}
 {
     "title": "Test form",
     "fields": [
-    {
-        "label": "Qual seu nome?",
-        "type": "text",
-        "required": false
-    },
-    {
-        "label": "Qual seu email?",
-        "type": "email",
-        "required": false
-    },
-    {
-        "label": "Qual seu telefone?",
-        "type": "phone",
-        "required": false
-    }]
+        {
+            "label": "Qual seu nome?",
+            "type": "text",
+            "required": false
+        },
+        {
+            "label": "Qual seu email?",
+            "type": "email",
+            "required": false
+        },
+        {
+            "label": "Qual seu telefone?",
+            "type": "phone",
+            "required": false
+        }
+    ],
+    "notifications_config" : [
+        {
+            "content_type": "formulario_finalizado",
+            "resources": [
+                {
+                    "type": "email",
+                    "values": [],
+                    "enable": true,
+                    "aditional_info": []
+                },
+                {
+                    "type": "zap",
+                    "values": [],
+                    "enable": true,
+                    "aditional_info": []
+                }
+            ]
+        },
+        {
+            "content_type": "copia_respostas_formulário",
+            "resources": [
+                {
+                    "type": "email",
+                    "values": [],
+                    "enable": true,
+                    "aditional_info": []
+                },
+                {
+                    "type": "webhook",
+                    "values": [
+                        "http://webhook1.com.br",
+                        "http://webhook2.com.br"
+                    ],
+                    "enable": true,
+                    "aditional_info": []
+                }
+            ]
+        }
+    ]
 }
 
 ### Acessando um form
@@ -111,6 +152,7 @@ content-type: application/json
 # Quando identificamos que é a última, enviamos o parametro "is_last" para
 # finalizar a sessão e salvar a hora que o preenchimento foi concluído.
 
+# @name lastAnswer
 POST {{host}}/api/answers HTTP/1.1
 content-type: application/json
 
@@ -121,7 +163,8 @@ content-type: application/json
     "value": "5511912312312",
     "field_id": "{{form.response.body.fields.2.field_id}}",
     "type": "{{form.response.body.fields.2.type}}",
-    "is_last": true
+    "is_last": true,
+    "respondent_email": "respodent@email.com"
 }
 
 # Após preencher a última pergunta possível para aquele respondente,
@@ -129,3 +172,11 @@ content-type: application/json
 # apaga o cookie com o respondent_id atual.
 
 # 🎉 Parabéns, você completou o fluxo básico da nossa API!
+
+### Envia notificações via route
+# Com o token de usuário, é possível chamar a rota para enviar as notificações do formulário.
+# O publicId é answers.public_id da ultima answer enviada.
+
+POST {{host}}/api/notifications/send-form-notifications/{{publicId}} HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}

@@ -6,7 +6,7 @@ use App\Models\Form;
 use App\Models\Answer;
 use App\Models\Respondent;
 use Illuminate\Http\Request;
-use App\Services\AnswerService;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Mail\SimpleMailNotification;
@@ -35,18 +35,19 @@ class AnswerController extends Controller
             'is_last' => 'sometimes|boolean',
             'respondent_email' => 'sometimes|email',
         ])->after(function ($validator) use ($request) {
-            /**
-             * realizando a validação do campo respondent_email somente se nas configurações do formulário existir um NotificationContentType::COPIA_RESPOSTAS_FORMULARIO)
-             */
-            $form = Form::where('slug', $request->input('form_id'))->first();
+            if (boolval($request->is_last)) {
+                /**
+                 * realizando a validação do campo respondent_email somente se nas configurações do formulário existir um NotificationContentType::COPIA_RESPOSTAS_FORMULARIO)
+                 */
+                $form = Form::where('slug', $request->input('form_id'))->first();
 
-            if ($form && !empty($form->notifications_config) && $form->containsContentType(NotificationContentType::COPIA_RESPOSTAS_FORMULARIO)) {
-                if (!$request->has('respondent_email')) {
-                    $validator->errors()->add('respondent_email', 'The respondent_email field is required when the form contains COPIA_RESPOSTAS_FORMULARIO.');
+                if ($form && !empty($form->notifications_config) && $form->containsContentType(NotificationContentType::COPIA_RESPOSTAS_FORMULARIO)) {
+                    if (!$request->has('respondent_email')) {
+                        $validator->errors()->add('respondent_email', 'The respondent_email field is required when the form contains COPIA_RESPOSTAS_FORMULARIO.');
+                    }
                 }
             }
         })->validate();
-
 
         DB::beginTransaction();
 
@@ -64,7 +65,7 @@ class AnswerController extends Controller
                 $answer->respondent?->fill(['email' => $validated['respondent_email'] ?? null])->save();
                 $answer->respondent?->setAsCompleted();
 
-                AnswerService::notify($answer);
+                NotificationService::notify($answer);
             }
 
             DB::commit();
@@ -73,6 +74,7 @@ class AnswerController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error processing answer: ' . $e->getMessage());
+
             return response()->json(['error' => 'Something went wrong'], 500);
         }
 

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Enums\NotificationResource;
 use App\Enums\NotificationAddressType;
 use App\Enums\NotificationContentType;
+use App\Enums\NotificationResourceType;
 use App\ValueObjects\NotificationConfig;
 use App\ValueObjects\NotificationAddress;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -28,12 +29,15 @@ class FormTest extends TestCase
 			],
             'notifications_config' => [
                 [
-                    'resource' => NotificationResource::EMAIL->value,
-                    'content_type' => NotificationContentType::FORMULARIO_FINALIZADO->value,
-                    'addresses' => [
-                        'type' => NotificationAddressType::EMAIL->value,
+                    'resources' => [
+                        [
+                            'type' => NotificationResourceType::EMAIL->value,
+                            'values' => [],
+                            'enable' => true,
+                            'aditional_info' => []
+                        ]
                     ],
-                    'enable' => true
+                    'content_type' => NotificationContentType::FORMULARIO_FINALIZADO->value,
                 ]
             ]
 		];
@@ -74,13 +78,7 @@ class FormTest extends TestCase
 				['type' => 'text', 'label' => 'Name', 'required' => true],
 				['type' => 'email', 'label' => 'Email', 'required' => true]
 			],
-            'notifications_config' => [
-                [
-                    'resource' => 'resource',
-                    'content_type' => 'content_type',
-                    'addresses' => ['addresses']
-                ]
-            ]
+            'notifications_config' => []
 		];
 
 		$response = $this->actingAs($user)->post('/api/forms', $formData);
@@ -125,12 +123,15 @@ class FormTest extends TestCase
             ],
             'notifications_config' => [
                 [
-                    'resource' => NotificationResource::EMAIL->value,
-                    'content_type' => NotificationContentType::FORMULARIO_FINALIZADO->value,
-                    'addresses' => [
-                        'type' => NotificationAddressType::EMAIL->value,
+                    'resources' => [
+                        [
+                            'type' => NotificationResourceType::EMAIL->value,
+                            'values' => [],
+                            'enable' => true,
+                            'aditional_info' => []
+                        ]
                     ],
-                    'enable' => true
+                    'content_type' => NotificationContentType::FORMULARIO_FINALIZADO->value,
                 ]
             ]
 		];
@@ -159,11 +160,13 @@ class FormTest extends TestCase
 				]
             ],
             'notifications_config' => [ // deve ser um array de arrays, aqui estou mandando somente um array associativo
-                'resource' => NotificationResource::EMAIL->value,
-                'content_type' => NotificationContentType::FORMULARIO_FINALIZADO->value,
-                'addresses' => [
-                    'type' => NotificationAddressType::EMAIL->value,
-                ]
+                'resources' => [
+                    'type' => NotificationResourceType::EMAIL->value,
+                    'values' => [],
+                    'enable' => true,
+                    'aditional_info' => []
+                ],
+                    'content_type' => NotificationContentType::FORMULARIO_FINALIZADO->value,
             ]
 		];
 

@@ -5,7 +5,7 @@ namespace App\Enums;
 /**
  * via por onde será enviada a notificação
  */
-enum NotificationResource: string
+enum NotificationResourceType: string
 {
     case ZAP = 'zap';
     case EMAIL = 'email';

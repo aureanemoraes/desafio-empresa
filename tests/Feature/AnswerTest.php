@@ -8,19 +8,16 @@ use App\Models\User;
 use App\Models\Answer;
 use App\Models\Respondent;
 use App\Jobs\SendZapMessage;
-use Illuminate\Support\Carbon;
 use App\Jobs\SendDataViaWebhook;
-use App\Enums\NotificationResource;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Log;
 use App\Mail\SimpleMailNotification;
 use Illuminate\Support\Facades\Mail;
-use App\Enums\NotificationAddressType;
 use App\Enums\NotificationContentType;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\NotificationResourceType;
 use Illuminate\Support\Facades\Storage;
 use App\ValueObjects\NotificationConfig;
-use App\ValueObjects\NotificationAddress;
+use App\ValueObjects\NotificationResource;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class AnswerTest extends TestCase
@@ -64,13 +61,10 @@ class AnswerTest extends TestCase
 		$form = Form::factory()->state([
             'notifications_config' => [
                 new NotificationConfig(
-                    NotificationResource::EMAIL,
-                    NotificationContentType::COPIA_RESPOSTAS_FORMULARIO,
-                    new NotificationAddress(
-                        NotificationAddressType::EMAIL,
-
-                    ),
-                    true
+                    [
+                        new NotificationResource(NotificationResourceType::EMAIL, true)
+                    ],
+                    NotificationContentType::COPIA_RESPOSTAS_FORMULARIO
                 )
             ]
         ])->create();
@@ -94,13 +88,10 @@ class AnswerTest extends TestCase
 		$form = Form::factory()->for($user)->state([
             'notifications_config' => [
                 new NotificationConfig(
-                    NotificationResource::EMAIL,
-                    NotificationContentType::COPIA_RESPOSTAS_FORMULARIO,
-                    new NotificationAddress(
-                        NotificationAddressType::EMAIL,
-
-                    ),
-                    true
+                    [
+                        new NotificationResource(NotificationResourceType::EMAIL, true)
+                    ],
+                    NotificationContentType::COPIA_RESPOSTAS_FORMULARIO
                 )
             ]
         ])->create();
@@ -115,9 +106,9 @@ class AnswerTest extends TestCase
 
 		$this->assertNotNull($post['data']['respondent']);
 
-        Mail::assertQueued(SimpleMailNotification::class, function ($mail) use ($user) {
-            return $mail->hasTo($user->email) &&
-                   $mail->subjectData === "Formulário preenchido - Owner" &&
+        Mail::assertQueued(SimpleMailNotification::class, function ($mail) use ($answer, $user) {
+            return $mail->hasTo($answer->respondent_email) &&
+                   $mail->subjectData === "Cópia Respostas Formulário - Respondent" &&
                    $mail->viewRelativePath === "mails.generic-mail-content";
         });
 	}
@@ -128,13 +119,10 @@ class AnswerTest extends TestCase
 		$form = Form::factory()->for($user)->state([
             'notifications_config' => [
                 new NotificationConfig(
-                    NotificationResource::EMAIL,
-                    NotificationContentType::FORMULARIO_FINALIZADO,
-                    new NotificationAddress(
-                        NotificationAddressType::EMAIL,
-
-                    ),
-                    true
+                    [
+                        new NotificationResource(NotificationResourceType::EMAIL, true)
+                    ],
+                    NotificationContentType::FORMULARIO_FINALIZADO
                 )
             ]
         ])->create();
@@ -158,16 +146,13 @@ class AnswerTest extends TestCase
         $form = Form::factory()->for($user)->state([
             'notifications_config' => [
                 new NotificationConfig(
-                    NotificationResource::WEBHOOK,
-                    NotificationContentType::COPIA_RESPOSTAS_FORMULARIO,
-                    new NotificationAddress(
-                        NotificationAddressType::URL,
-                        [
+                    [
+                        new NotificationResource(NotificationResourceType::WEBHOOK, true, [
                             'http://webhookaleatorio1.com.br',
                             'http://webhookaleatorio2.com.br',
-                        ]
-                    ),
-                    true
+                        ])
+                    ],
+                    NotificationContentType::COPIA_RESPOSTAS_FORMULARIO
                 )
             ]
         ])->create();
@@ -202,12 +187,10 @@ class AnswerTest extends TestCase
         $form = Form::factory()->for($user)->state([
             'notifications_config' => [
                 new NotificationConfig(
-                    NotificationResource::ZAP,
-                    NotificationContentType::COPIA_RESPOSTAS_FORMULARIO,
-                    new NotificationAddress(
-                        NotificationAddressType::PHONE_NUMBER
-                    ),
-                    true
+                    [
+                        new NotificationResource(NotificationResourceType::ZAP, true)
+                    ],
+                    NotificationContentType::FORMULARIO_FINALIZADO
                 )
             ]
         ])->create();
@@ -215,6 +198,7 @@ class AnswerTest extends TestCase
         $answer->is_last = true;
 
         $post = $this->post('/api/answers', $answer->toArray());
+
 
         Bus::assertDispatched(SendZapMessage::class, function ($job) use ($user) {
             return $job->number === $user->phone;
@@ -254,12 +238,10 @@ class AnswerTest extends TestCase
         $form = Form::factory()->for($user)->state([
             'notifications_config' => [
                 new NotificationConfig(
-                    NotificationResource::ZAP,
-                    NotificationContentType::COPIA_RESPOSTAS_FORMULARIO,
-                    new NotificationAddress(
-                        NotificationAddressType::PHONE_NUMBER
-                    ),
-                    true
+                    [
+                        new NotificationResource(NotificationResourceType::ZAP, true)
+                    ],
+                    NotificationContentType::FORMULARIO_FINALIZADO
                 )
             ]
         ])->create();
@@ -291,13 +273,11 @@ class AnswerTest extends TestCase
 		$form = Form::factory()->for($user)->state([
             'notifications_config' => [
                 new NotificationConfig(
-                    NotificationResource::ZAP,
-                    NotificationContentType::FORMULARIO_FINALIZADO,
-                    new NotificationAddress(
-                        NotificationAddressType::PHONE_NUMBER,
-                    ),
-                    true
-                ),
+                    [
+                        new NotificationResource(NotificationResourceType::ZAP, true)
+                    ],
+                    NotificationContentType::FORMULARIO_FINALIZADO
+                )
             ]
         ])->create();
 		$answer = Answer::factory()->for($form)->make(["respondent_id" => null]);

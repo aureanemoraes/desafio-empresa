@@ -19,6 +19,7 @@ class FormController extends Controller
 
     public function store(Request $request)
     {
+        // return response($request->all(), 200);
         $validData = $request->validate([
             'title' => 'required|max:255',
             'fields' => 'required|array',
@@ -45,7 +46,7 @@ class FormController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response(["data" => $e->getMessage() ?? 'Error on create a new form.'], $e->getCode() ?? 500);
+            return response(["data" => $e->getMessage() ?? 'Error on create a new form.'], 500);
         }
     }
 

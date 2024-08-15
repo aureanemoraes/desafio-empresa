@@ -11,11 +11,8 @@ use App\Casts\NotificationConfig as NotificationConfigCast;
 class NotificationConfig implements Castable
 {
     function __construct(
-        public NotificationResource $resource,
+        public array|null $resources = [],
         public NotificationContentType $contentType,
-        public NotificationAddress $addresses,
-        public bool $enable = false,
-        public array|null $aditionalInfo = [],
     )
     {
     }

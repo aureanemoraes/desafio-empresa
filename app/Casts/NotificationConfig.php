@@ -3,11 +3,10 @@
 namespace App\Casts;
 
 use InvalidArgumentException;
-use App\Enums\NotificationResource;
-use App\Enums\NotificationAddressType;
 use App\Enums\NotificationContentType;
+use App\Enums\NotificationResourceType;
 use Illuminate\Database\Eloquent\Model;
-use App\ValueObjects\NotificationAddress;
+use App\ValueObjects\NotificationResource;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use App\ValueObjects\NotificationConfig as NotificationConfigValueObject;
 
@@ -24,14 +23,13 @@ class NotificationConfig implements CastsAttributes
         // instanciando utilizando as classes que garantem a estruta do notifications_config
         return array_map(function ($item) {
             return new NotificationConfigValueObject(
-                NotificationResource::from($item['resource']),
+                array_map(fn ($resource) => new NotificationResource(
+                    NotificationResourceType::from($resource['type']),
+                    $resource['enable'],
+                    $resource['values'],
+                    $resource['aditionalInfo']
+                ), $item['resources']),
                 NotificationContentType::from($item['content_type']),
-                new NotificationAddress(
-                    NotificationAddressType::from($item['addresses']['type']),
-                    $item['addresses']['values'] ?? []
-                ),
-                $item['enable'],
-                $item['aditional_info']
             );
         }, $value);
     }
@@ -50,28 +48,22 @@ class NotificationConfig implements CastsAttributes
         $encodedValue = json_encode(array_map(function ($item) {
             if (!($item instanceof NotificationConfigValueObject)) {
                 $item = new NotificationConfigValueObject(
-                    NotificationResource::from($item['resource']),
+                    array_map(fn ($resource) => new NotificationResource(
+                        NotificationResourceType::from($resource['type']),
+                        $resource['enable'] ?? false,
+                        $resource['values'] ?? [],
+                        $resource['aditional_info'] ?? []
+                    ), $item['resources']),
                     NotificationContentType::from($item['content_type']),
-                    new NotificationAddress(
-                        NotificationAddressType::from($item['addresses']['type']),
-                        $item['addresses']['values'] ?? []
-                    ),
-                    $item['enable'] ?? false,
-                    $item['aditional_info'] ?? []
                 );
             }
 
             return [
-                'resource' => $item->resource,
+                'resources' => $item->resources,
                 'content_type' => $item->contentType,
-                'addresses' => [
-                    'type' => $item->addresses->type,
-                    'values' => $item->addresses->values
-                ],
-                'enable' => $item->enable,
-                'aditional_info' => $item->aditionalInfo,
             ];
         }, $value));
+
 
         return [$key => $encodedValue];
     }

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Mail\SimpleMailNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\NotificationResourceType;
 use App\Services\DataTreater\EmailData;
 use App\ValueObjects\NotificationConfig;
 
@@ -23,13 +24,15 @@ class SendNewFormFormFilling
     {
         $respondent->load(['form.user']);
 
-        switch($notificationConfig->resource) {
-            case NotificationResource::ZAP:
-                $this->viaZap($respondent);
-                break;
-            case NotificationResource::EMAIL:
-                $this->viaEmail($respondent);
-                break;
+        foreach($notificationConfig->resources as $resource) {
+            switch($resource->type) {
+                case NotificationResourceType::ZAP:
+                    $this->viaZap($respondent);
+                    break;
+                case NotificationResourceType::EMAIL:
+                    $this->viaEmail($respondent);
+                    break;
+            }
         }
 
     }

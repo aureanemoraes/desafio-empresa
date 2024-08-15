@@ -5,12 +5,10 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\Form;
 use App\Models\User;
-use App\Services\FormService;
-use App\Enums\NotificationResource;
-use App\Enums\NotificationAddressType;
 use App\Enums\NotificationContentType;
+use App\Enums\NotificationResourceType;
 use App\ValueObjects\NotificationConfig;
-use App\ValueObjects\NotificationAddress;
+use App\ValueObjects\NotificationResource;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class UserUnitTest extends TestCase
@@ -21,12 +19,10 @@ class UserUnitTest extends TestCase
     public function test_increment_amount_zap_messages_sent_per_month()
     {
         $notificationConfig = new NotificationConfig(
-            NotificationResource::ZAP,
-            NotificationContentType::FORMULARIO_FINALIZADO,
-            new NotificationAddress(
-                NotificationAddressType::PHONE_NUMBER
-            ),
-            true
+            [
+                new NotificationResource(NotificationResourceType::EMAIL, true)
+            ],
+            NotificationContentType::FORMULARIO_FINALIZADO
         );
 
         $user = User::factory()->create();
