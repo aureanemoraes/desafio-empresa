@@ -2,19 +2,20 @@
 
 namespace App\ValueObjects;
 
-use App\Enums\NotificationResource;
-use App\Enums\NotificationAddressType;
 use App\Enums\NotificationContentType;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use App\Casts\NotificationConfig as NotificationConfigCast;
 
 class NotificationConfig implements Castable
 {
-    function __construct(
+    public function __construct(
+        /**
+         * @var NotificationResource[]
+         */
         public array|null $resources = [],
+
         public NotificationContentType $contentType,
-    )
-    {
+    ) {
     }
 
     /**
@@ -27,4 +28,3 @@ class NotificationConfig implements Castable
         return NotificationConfigCast::class;
     }
 }
-

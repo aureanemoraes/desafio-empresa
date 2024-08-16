@@ -2,7 +2,6 @@
 
 namespace App\Services\Notifications;
 
-
 use App\Models\Respondent;
 use App\Jobs\SendZapMessage;
 use Illuminate\Support\Facades\DB;
@@ -20,21 +19,21 @@ class SendNewFormFormFilling
     public function send(
         NotificationConfig $notificationConfig,
         Respondent $respondent
-    )
-    {
+    ) {
         $respondent->load(['form.user']);
 
         foreach($notificationConfig->resources as $resource) {
-            switch($resource->type) {
-                case NotificationResourceType::ZAP:
-                    $this->viaZap($respondent);
-                    break;
-                case NotificationResourceType::EMAIL:
-                    $this->viaEmail($respondent);
-                    break;
+            if ($resource->enable) {
+                switch($resource->type) {
+                    case NotificationResourceType::ZAP:
+                        $this->viaZap($respondent);
+                        break;
+                    case NotificationResourceType::EMAIL:
+                        $this->viaEmail($respondent);
+                        break;
+                }
             }
         }
-
     }
 
     private function viaZap(Respondent $respondent)
@@ -42,9 +41,9 @@ class SendNewFormFormFilling
         $form = $respondent?->form;
         $accountUser = $respondent?->form?->user;
 
-         /**
-         * Optei por não retornar nenhum erro, apenas registrar via log pois acredito a falha nas notificaçõesnão deva influenciar em nenhum fluxo, deve haver uma tratativa mais secundária somente com o objetivo de informar que não foi realizado o envio e o motivo
-         */
+        /**
+        * Optei por não retornar nenhum erro, apenas registrar via log pois acredito a falha nas notificaçõesnão deva influenciar em nenhum fluxo, deve haver uma tratativa mais secundária somente com o objetivo de informar que não foi realizado o envio e o motivo
+        */
         if (isset($accountUser)) {
             if ($accountUser->canSendZapMessage()) {
                 if (Schema::hasColumn('users', 'phone')) {
@@ -76,11 +75,10 @@ class SendNewFormFormFilling
             new SimpleMailNotification(
                 "Formulário preenchido - Owner",
                 "mails.generic-mail-content",
-               $data->treat()
+                $data->treat()
             )
         );
 
 
     }
 }
-

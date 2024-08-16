@@ -2,7 +2,6 @@
 
 namespace App\Services\Notifications;
 
-
 use App\Models\Respondent;
 use App\Jobs\SendDataViaWebhook;
 use App\Enums\NotificationResource;
@@ -13,24 +12,24 @@ use App\Services\DataTreater\EmailData;
 use App\ValueObjects\NotificationConfig;
 use App\Services\DataTreater\AnswersWebhookData;
 
-
 class SendFormAnswers
 {
     public function send(
         NotificationConfig $notificationConfig,
         Respondent $respondent
-    )
-    {
+    ) {
         $respondent->load(['form.user']);
 
         foreach($notificationConfig->resources as $resource) {
-            switch($resource->type) {
-                case NotificationResourceType::WEBHOOK:
-                    $this->viaWebhook($respondent, $resource->values);
-                    break;
-                case NotificationResourceType::EMAIL:
-                    $this->viaEmail($respondent);
-                    break;
+            if ($resource->enable) {
+                switch($resource->type) {
+                    case NotificationResourceType::WEBHOOK:
+                        $this->viaWebhook($respondent, $resource->values);
+                        break;
+                    case NotificationResourceType::EMAIL:
+                        $this->viaEmail($respondent);
+                        break;
+                }
             }
         }
     }
@@ -58,4 +57,3 @@ class SendFormAnswers
         );
     }
 }
-
